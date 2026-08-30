@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forensics Workspace</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        
+        .tree-line {
+            position: relative;
+        }
+        .tree-line::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: -12px;
+            width: 1px;
+            background-color: #e2e8f0;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden border border-slate-200">
+        <!-- Header -->
+        <div class="bg-slate-800 text-white p-4 md:p-6 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-magnifying-glass-chart text-2xl text-green-400"></i>
+                <h1 class="text-xl md:text-2xl font-bold tracking-tight">Forensics</h1>
+            </div>
+            <div class="text-sm text-slate-300 hidden md:block">
+                Quản lý tập trung tài liệu HackMD & Files
+            </div>
+        </div>
+
+        <!-- Explorer Container -->
+        <div class="p-4 md:p-6 flex flex-col md:flex-row gap-6">
+            
+            <!-- Sidebar / Tree View -->
+            <div class="w-full md:w-2/3 bg-slate-50 border border-slate-200 rounded-lg p-4 min-h-[400px] md:min-h-[500px] overflow-y-auto">
+                <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4 border-b border-slate-200 pb-2">
+                    <i class="fa-solid fa-folder-tree mr-2"></i> File Explorer (Đã sắp xếp A-Z)
+                </h2>
+                
+                <!-- This is where the tree will be rendered -->
+                <div id="tree-root" class="select-none" aria-live="polite"></div>
+            </div>
+
+            <!-- Side Panel (Guide) -->
+            <div class="w-full md:w-1/3 bg-white border border-slate-200 rounded-lg flex flex-col shadow-sm min-h-[400px] md:min-h-[500px] overflow-hidden">
+                <div class="py-3 px-4 border-b border-slate-200 font-bold text-sm text-blue-700 bg-blue-50/50 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info"></i> Hướng dẫn sử dụng
+                </div>
+                
+                <div class="p-4 flex-1 overflow-y-auto bg-blue-50/30">
+                    <ul class="text-sm text-blue-900 space-y-3">
+                        <li><i class="fa-solid fa-chevron-right text-blue-400 mr-1"></i> Các thư mục và tệp được <strong>tự động sắp xếp A-Z</strong>, thư mục luôn hiển thị trước tệp.</li>
+                        <li><i class="fa-solid fa-chevron-right text-blue-400 mr-1"></i> Bấm vào <strong>Thư mục</strong> <i class="fa-solid fa-folder text-yellow-500 mx-1"></i> để mở/đóng.</li>
+                        <li><i class="fa-solid fa-chevron-right text-blue-400 mr-1"></i> Bấm vào <strong>Tên Tệp</strong> để mở bài viết trên HackMD ở tab mới.</li>
+                    </ul>
+                    
+                    <div class="mt-6 p-3 bg-white rounded border border-blue-200 text-xs text-slate-600 shadow-inner">
+                        <strong>Tip:</strong> Có thể tải thẳng file HTML này lên GitHub Pages để làm web cá nhân miễn phí!
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hướng dẫn chỉnh sửa (Dev Guide) -->
+        <div class="p-4 md:p-6 border-t border-slate-200 bg-slate-50">
+            <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-code text-slate-600"></i> Hướng dẫn thêm cấu trúc (Dành cho bạn)
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                <!-- Thêm Thư mục -->
+                <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm relative">
+                    <h4 class="font-bold text-green-700 mb-2"><i class="fa-solid fa-folder-plus mr-1"></i> 1. Cách thêm Thư mục (Folder)</h4>
+                    <p class="text-slate-600 mb-2">Copy đoạn code sau dán vào trong mảng <code>children</code> của nơi bạn muốn thêm. Hệ thống sẽ tự động sắp xếp vị trí.</p>
+                    <pre class="bg-slate-800 text-green-400 p-3 rounded font-mono text-xs overflow-x-auto leading-relaxed">
+{
+    <span class="text-white">type</span>: <span class="text-yellow-300">"folder"</span>,
+    <span class="text-white">name</span>: <span class="text-yellow-300">"Tên Thư Mục Mới"</span>,
+    <span class="text-white">isOpen</span>: <span class="text-blue-300">true</span>, <span class="text-slate-400">// true = mở sẵn, false = đóng</span>
+    <span class="text-white">children</span>: [
+        <span class="text-slate-400">// Khai báo các file hoặc folder con ở đây</span>
+    ]
+}</pre>
+                </div>
+
+                <!-- Thêm Tệp -->
+                <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm relative">
+                    <h4 class="font-bold text-blue-700 mb-2"><i class="fa-solid fa-file-circle-plus mr-1"></i> 2. Cách thêm Tệp (File) & Link</h4>
+                    <p class="text-slate-600 mb-2">Thêm tệp mới vào trong <code>children</code>. Gắn link HackMD/Drive vào phần <code>url</code>.</p>
+                    <pre class="bg-slate-800 text-blue-400 p-3 rounded font-mono text-xs overflow-x-auto leading-relaxed">
+{ 
+    <span class="text-white">type</span>: <span class="text-yellow-300">"file"</span>, 
+    <span class="text-white">name</span>: <span class="text-yellow-300">"ten-bai-viet.md"</span>, 
+    <span class="text-white">url</span>: <span class="text-yellow-300">"https://hackmd.io/link-cua-ban"</span> 
+}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileStructure = [
+            {
+                type: "folder",
+                name: "Main",
+                isOpen: true,
+                children: [
+                    {
+                        type: "folder",
+                        name: "Knowledge",
+                        isOpen: false,
+                        children: [
+                            { type: "file", name: "linux.md", url: "https://hackmd.io/@LpTue/Sy4OuibdGl" },
+                            { type: "file", name: "win.md", url: "https://hackmd.io/@LpTue/SyM4d_iWOzg" },
+                            { type: "file", name: "network.md", url: "https://hackmd.io/@LpTue/BklN__sZ_ze" },
+                            { type: "file", name: "wireshark.md", url: "https://hackmd.io/@LpTue/S1oN6A-dMx" },
+                            {
+                                type: "folder",
+                                name: "Tools",
+                                isOpen: false,
+                                children: [
+                                    { type: "file", name: "exiftool.md", url: "https://hackmd.io/@LpTue/HyHSRaZ_fe" },
+                                    { type: "file", name: "binwalk.md", url: "https://hackmd.io/@LpTue/SJ6ERT-_Me" },
+                                    { type: "file", name: "foremost.md", url: "https://hackmd.io/@LpTue/B1_HApbdzx" },
+                                    { type: "file", name: "hex editor.md", url: "https://hackmd.io/@LpTue/r13B0pWdMl" },
+                                    { type: "file", name: "sonic.md", url: "https://hackmd.io/@LpTue/BJk8RTZOMx" },
+                                    { type: "file", name: "zsteg.md", url: "https://hackmd.io/@LpTue/ByzIA6-uze" },
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        type: "folder",
+                        name: "WriteUp",
+                        isOpen: false,
+                        children: [
+                            {
+                                type: "folder",
+                                name: "PicoCTF_Easy",
+                                isOpen: false,
+                                children: [
+                                    { type: "file", name: "Binary Digits.md", url: "https://hackmd.io/@LpTue/Sy5Etjbdzl" },
+                                    { type: "file", name: "Corrupted file.md", url: "https://hackmd.io/@LpTue/rkl94KjW_fe" },
+                                    { type: "file", name: "DISKO 1.md", url: "https://hackmd.io/@LpTue/ry-qEYibOGe" },
+                                    { type: "file", name: "Flag in Flame.md", url: "https://hackmd.io/@LpTue/H1f5VKobuGe" },
+                                    { type: "file", name: "Glory of the Garden.md", url: "https://hackmd.io/@LpTue/BkX5VYs-dfl" },
+                                    { type: "file", name: "Hidden in plainsight.md", url: "https://hackmd.io/@LpTue/HJE5EYjZOGe" },
+                                    { type: "file", name: "information.md", url: "https://hackmd.io/@LpTue/BkB9VFsb_Gl" },
+                                    { type: "file", name: "ph4nt0m 1ntrud3r.md", url: "https://hackmd.io/@LpTue/S1I5EtjbOMl" },
+                                    { type: "file", name: "RED.md", url: "https://hackmd.io/@LpTue/rJw5NKoWdGg" },
+                                    { type: "file", name: "Riddle Registry.md", url: "https://hackmd.io/@LpTue/S1d5EKiWufl" },
+                                    { type: "file", name: "Scan Surprise.md", url: "https://hackmd.io/@LpTue/BkKcVYjZuze" },
+                                    { type: "file", name: "Secret of the Polyglot.md", url: "https://hackmd.io/@LpTue/B155VFoWufg" },
+                                    { type: "file", name: "Verify.md", url: "https://hackmd.io/@LpTue/H1s94Kj-_Mg" },
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        function sortTreeItems(items) {
+            if (!items) return [];
+            return items.sort((a, b) => {
+                // Ưu tiên folder lên trước file
+                if (a.type === 'folder' && b.type !== 'folder') return -1;
+                if (a.type !== 'folder' && b.type === 'folder') return 1;
+                
+                // Sắp xếp A-Z theo tên (hỗ trợ tiếng Việt và số tự nhiên)
+                return a.name.localeCompare(b.name, 'vi', { sensitivity: 'base', numeric: true });
+            });
+        }
+
+        function getIcon(type, isOpen, name) {
+            if (type === "folder") {
+                return isOpen ? '<i class="fa-regular fa-folder-open text-yellow-500 w-5"></i>' 
+                              : '<i class="fa-solid fa-folder text-yellow-500 w-5"></i>';
+            }
+            
+            const lowerName = name.toLowerCase();
+            
+            if (lowerName.endsWith('.md')) return '<i class="fa-brands fa-markdown text-blue-500 w-5"></i>';
+            if (lowerName.endsWith('.pcap') || lowerName.endsWith('.pcapng')) return '<i class="fa-solid fa-network-wired text-green-600 w-5"></i>';
+            if (lowerName.endsWith('.pdf')) return '<i class="fa-solid fa-file-pdf text-red-600 w-5"></i>';
+            if (lowerName.endsWith('.evtx') || lowerName.endsWith('.log')) return '<i class="fa-solid fa-shield-halved text-blue-700 w-5"></i>';
+            if (lowerName.endsWith('.img') || lowerName.endsWith('.dd') || lowerName.endsWith('.raw') || lowerName.endsWith('.vmdk')) return '<i class="fa-solid fa-hard-drive text-slate-600 w-5"></i>';
+            if (lowerName.endsWith('.mem') || lowerName.endsWith('.dmp') || lowerName.endsWith('.dump') || lowerName.endsWith('.vmem')) return '<i class="fa-solid fa-memory text-red-500 w-5"></i>';
+            if (lowerName.endsWith('.py')) return '<i class="fa-brands fa-python text-yellow-500 w-5"></i>';
+            if (lowerName.endsWith('.cpp') || lowerName.endsWith('.c') || lowerName.endsWith('.h')) return '<i class="fa-solid fa-file-code text-blue-400 w-5"></i>';
+            if (lowerName.endsWith('.exe') || lowerName.endsWith('.bin') || lowerName.endsWith('.elf') || lowerName.endsWith('.dll')) return '<i class="fa-solid fa-bug text-red-700 w-5"></i>';
+            if (lowerName.endsWith('.zip') || lowerName.endsWith('.rar') || lowerName.endsWith('.7z')) return '<i class="fa-solid fa-file-zipper text-purple-500 w-5"></i>';
+            if (lowerName.endsWith('.jpg') || lowerName.endsWith('.png') || lowerName.endsWith('.jpeg')) return '<i class="fa-regular fa-image text-green-500 w-5"></i>';
+            
+            return '<i class="fa-regular fa-file-lines text-slate-400 w-5"></i>';
+        }
+
+        function createTreeNode(item) {
+            const wrapper = document.createElement('div');
+            
+            const row = document.createElement('div');
+            row.className = 'flex items-center gap-2 py-1.5 px-2 hover:bg-slate-200 rounded cursor-pointer transition-colors duration-150 group';
+            
+            const iconSpan = document.createElement('span');
+            iconSpan.innerHTML = getIcon(item.type, item.isOpen, item.name);
+            
+            const textSpan = document.createElement('span');
+            textSpan.className = item.type === 'folder' ? 'font-medium text-slate-700' : 'text-slate-600 hover:text-blue-600 transition-colors flex-1 truncate';
+            textSpan.textContent = item.name;
+
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'ml-auto flex items-center opacity-0 group-hover:opacity-100 transition-opacity gap-2 pr-1';
+
+            if (item.type === 'file') {
+                const externalIcon = document.createElement('button');
+                externalIcon.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square text-[12px] text-blue-500 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-full p-1.5 w-6 h-6 flex items-center justify-center transition-colors"></i>';
+                externalIcon.title = "Mở bài viết";
+                externalIcon.onclick = (e) => {
+                    e.stopPropagation();
+                    if(item.url) window.open(item.url, '_blank', 'noopener,noreferrer');
+                    else alert('Chưa có link cho file này!');
+                };
+                actionsDiv.appendChild(externalIcon);
+            }
+
+            row.appendChild(iconSpan);
+            row.appendChild(textSpan);
+            if(item.type === 'file') row.appendChild(actionsDiv);
+
+            wrapper.appendChild(row);
+
+            if (item.type === 'folder' && item.children) {
+                // Sắp xếp danh sách con trước khi render
+                sortTreeItems(item.children);
+
+                const childrenContainer = document.createElement('div');
+                childrenContainer.className = `pl-6 tree-line ml-3 mt-1 ${item.isOpen ? 'block' : 'hidden'}`;
+                
+                item.children.forEach(child => {
+                    childrenContainer.appendChild(createTreeNode(child));
+                });
+                wrapper.appendChild(childrenContainer);
+
+                row.onclick = (e) => {
+                    e.stopPropagation();
+                    item.isOpen = !item.isOpen;
+                    iconSpan.innerHTML = getIcon('folder', item.isOpen, item.name);
+                    childrenContainer.className = `pl-6 tree-line ml-3 mt-1 ${item.isOpen ? 'block' : 'hidden'}`;
+                };
+            } 
+            else if (item.type === 'file') {
+                row.onclick = (e) => {
+                    e.stopPropagation();
+                    if(item.url) {
+                        window.open(item.url, '_blank');
+                    } else {
+                        alert('Chưa có link cho file này!');
+                    }
+                };
+            }
+
+            return wrapper;
+        }
+
+        function renderApp() {
+            const rootContainer = document.getElementById('tree-root');
+            rootContainer.innerHTML = '';
+            
+            // Sắp xếp cấp gốc
+            sortTreeItems(fileStructure);
+
+            fileStructure.forEach(item => {
+                rootContainer.appendChild(createTreeNode(item));
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                renderApp();
+            } catch (error) {
+                console.error('Không thể render File Explorer:', error);
+                const root = document.getElementById('tree-root');
+                if (root) {
+                    root.innerHTML = '<div class="p-3 rounded bg-red-50 border border-red-200 text-red-700 text-sm">Không thể tải File Explorer. Mở F12 → Console để xem lỗi.</div>';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
