@@ -61,7 +61,6 @@
                     <i class="fa-solid fa-folder-tree mr-2"></i> File Explorer (Đã sắp xếp A-Z)
                 </h2>
                 
-                <!-- This is where the tree will be rendered -->
                 <div id="tree-root" class="select-none" aria-live="polite"></div>
             </div>
 
@@ -201,11 +200,9 @@
         function sortTreeItems(items) {
             if (!items) return [];
             return items.sort((a, b) => {
-                // Ưu tiên folder lên trước file
                 if (a.type === 'folder' && b.type !== 'folder') return -1;
                 if (a.type !== 'folder' && b.type === 'folder') return 1;
                 
-                // Sắp xếp A-Z theo tên (hỗ trợ tiếng Việt và số tự nhiên)
                 return a.name.localeCompare(b.name, 'vi', { sensitivity: 'base', numeric: true });
             });
         }
@@ -213,7 +210,7 @@
         function getIcon(type, isOpen, name) {
             if (type === "folder") {
                 return isOpen ? '<i class="fa-regular fa-folder-open text-yellow-500 w-5"></i>' 
-                              : '<i class="fa-solid fa-folder text-yellow-500 w-5"></i>';
+                            : '<i class="fa-solid fa-folder text-yellow-500 w-5"></i>';
             }
             
             const lowerName = name.toLowerCase();
@@ -268,7 +265,6 @@
             wrapper.appendChild(row);
 
             if (item.type === 'folder' && item.children) {
-                // Sắp xếp danh sách con trước khi render
                 sortTreeItems(item.children);
 
                 const childrenContainer = document.createElement('div');
@@ -304,7 +300,6 @@
             const rootContainer = document.getElementById('tree-root');
             rootContainer.innerHTML = '';
             
-            // Sắp xếp cấp gốc
             sortTreeItems(fileStructure);
 
             fileStructure.forEach(item => {
